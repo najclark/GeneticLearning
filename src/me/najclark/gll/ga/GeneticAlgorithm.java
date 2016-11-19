@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
-import me.najclark.gll.nn.JLayer;
-import me.najclark.gll.nn.JNeuralNetwork;
-import me.najclark.gll.nn.JNeuron;
-import me.najclark.gll.nn.JWeightGroup;
+import me.najclark.gll.nn.Layer;
+import me.najclark.gll.nn.NeuralNetwork;
+import me.najclark.gll.nn.Neuron;
+import me.najclark.gll.nn.WeightGroup;
 
 public abstract class GeneticAlgorithm {
 
@@ -23,13 +23,13 @@ public abstract class GeneticAlgorithm {
 	protected String output = "";
 
 	public Individual mutate(Individual ind, double mutateRate) {
-		JNeuralNetwork nn = ind.nn;
-		JNeuralNetwork mutated = new JNeuralNetwork(nn);
+		NeuralNetwork nn = ind.nn;
+		NeuralNetwork mutated = new NeuralNetwork(nn);
 		mutated.makeWeightGroups();
 		boolean changed = false;
 
 		for (int i = 0; i < nn.getWeightGroups().size(); i++) {
-			JWeightGroup wg = mutated.getWeightGroups().get(i);
+			WeightGroup wg = mutated.getWeightGroups().get(i);
 			for (int d = 0; d < wg.getWeights().length; d++) {
 				if (random.nextDouble() < mutateRate) {
 					changed = true;
@@ -45,7 +45,7 @@ public abstract class GeneticAlgorithm {
 			if (random.nextDouble() < mutateRate * 10) { // Add or remove Layer
 															// to
 				// NeuralNetwork
-				JNeuralNetwork changedDesign = new JNeuralNetwork(nn);
+				NeuralNetwork changedDesign = new NeuralNetwork(nn);
 				int index;
 				if (nn.getLayers().size() <= 2) {
 					index = 1;
@@ -56,26 +56,26 @@ public abstract class GeneticAlgorithm {
 																			// a
 																			// layer
 					int neurons = nn.getTotalNeurons() / nn.getLayers().size();
-					changedDesign.addLayerAt(index, new JLayer(neurons));
+					changedDesign.addLayerAt(index, new Layer(neurons));
 				} else { // Remove a layer
 					changedDesign.removeLayer(index);
 				}
 				changedDesign.makeWeightGroups();
 				return new Individual(0, changedDesign, ind.name);
 			} else { // Add or remove a neuron from a layer
-				JNeuralNetwork changedDesign = new JNeuralNetwork(nn);
+				NeuralNetwork changedDesign = new NeuralNetwork(nn);
 				if (nn.getLayers().size() > 2) {
 
 					int changeLayer = random.nextInt(nn.getLayers().size() - 2) + 1;
 
-					JLayer l = nn.getLayers().get(changeLayer);
+					Layer l = nn.getLayers().get(changeLayer);
 					int deltaNeurons = pickMutationLevel();
 					if (random.nextBoolean()) {
 						for (int i = 0; i < deltaNeurons; i++) {
-							l.addNeuron(new JNeuron());
+							l.addNeuron(new Neuron());
 						}
 					} else {
-						l = new JLayer();
+						l = new Layer();
 						for (int i = 0; i < Math.max(1,
 								nn.getLayers().get(changeLayer).getNeurons().length - deltaNeurons); i++) {
 							l.addNeuron(nn.getLayers().get(changeLayer).getNeuron(i));
@@ -86,8 +86,8 @@ public abstract class GeneticAlgorithm {
 					changedDesign.makeWeightGroups();
 
 					for (int w = 0; w < nn.getWeightGroups().size(); w++) {
-						JWeightGroup wg = nn.getWeightGroups().get(w);
-						JWeightGroup newWg = changedDesign.getWeightGroups().get(w);
+						WeightGroup wg = nn.getWeightGroups().get(w);
+						WeightGroup newWg = changedDesign.getWeightGroups().get(w);
 						int index = 0;
 						while (index < wg.getWeights().length && index < newWg.getWeights().length) {
 							newWg.setWeight(index, wg.getWeight(index));
@@ -113,15 +113,15 @@ public abstract class GeneticAlgorithm {
 	}
 
 	public Individual crossover(Individual ind, Individual ind2) {
-		JNeuralNetwork nn = ind.nn;
-		JNeuralNetwork nn2 = ind2.nn;
-		JNeuralNetwork crossed;
-		JNeuralNetwork copied;
+		NeuralNetwork nn = ind.nn;
+		NeuralNetwork nn2 = ind2.nn;
+		NeuralNetwork crossed;
+		NeuralNetwork copied;
 		if (random.nextBoolean()) {
-			crossed = new JNeuralNetwork(nn);
+			crossed = new NeuralNetwork(nn);
 			copied = nn;
 		} else {
-			crossed = new JNeuralNetwork(nn2);
+			crossed = new NeuralNetwork(nn2);
 			copied = nn2;
 		}
 
@@ -130,9 +130,9 @@ public abstract class GeneticAlgorithm {
 
 		int i = 0;
 		while (i < nn.getWeightGroups().size() && i < nn2.getWeightGroups().size()) {
-			JWeightGroup wg = nn.getWeightGroups().get(i);
-			JWeightGroup wg2 = nn2.getWeightGroups().get(i);
-			JWeightGroup newWg = crossed.getWeightGroups().get(i);
+			WeightGroup wg = nn.getWeightGroups().get(i);
+			WeightGroup wg2 = nn2.getWeightGroups().get(i);
+			WeightGroup newWg = crossed.getWeightGroups().get(i);
 
 			if (wg.getWeights().length == newWg.getWeights().length) {
 				newWg.setWeights(wg.getWeights());
@@ -155,7 +155,7 @@ public abstract class GeneticAlgorithm {
 		return new Individual(0, crossed, Individual.mixNames(ind.name, ind2.name));
 	}
 
-	public JNeuralNetwork acceptReject(ArrayList<Individual> pool, int maxFitness) {
+	public NeuralNetwork acceptReject(ArrayList<Individual> pool, int maxFitness) {
 		Random random = new Random();
 		int besafe = 0;
 		while (besafe < 10000) {
@@ -272,7 +272,7 @@ public abstract class GeneticAlgorithm {
 		clearStats();
 	}
 
-	public abstract double simulate(JNeuralNetwork nn);
+	public abstract double simulate(NeuralNetwork nn);
 	
 	public abstract void makeNewGeneration();
 	

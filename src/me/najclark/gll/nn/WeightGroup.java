@@ -4,7 +4,7 @@ package me.najclark.gll.nn;
 import java.io.Serializable;
 import java.util.Random;
 
-public class JWeightGroup implements Serializable{
+public class WeightGroup implements Serializable{
 	
 	/**
 	 * 
@@ -20,7 +20,7 @@ public class JWeightGroup implements Serializable{
 	 * {@code public WeightGroup(double[] weights)}
 	 * @param weights - the array of weights in the WeightGroup.
 	 */
-	public JWeightGroup(double[] weights){
+	public WeightGroup(double[] weights){
 		this.weights = weights;
 	}
 	
@@ -30,7 +30,7 @@ public class JWeightGroup implements Serializable{
 	 * @param l2 - The second of the layers to connect.
 	 * @return A WeightGroup instance that connects the two layers.
 	 */
-	public static JWeightGroup connectLayers(JLayer l1, JLayer l2){
+	public static WeightGroup connectLayers(Layer l1, Layer l2){
 		
 		Random r = new Random();
 		double[] weights = new double[l1.size()*l2.size()];
@@ -39,7 +39,7 @@ public class JWeightGroup implements Serializable{
 			weights[i] = (r.nextFloat() - 0.5) * 2;
 		}
 		
-		return new JWeightGroup(weights);
+		return new WeightGroup(weights);
 	}
 	
 	/**

@@ -1,7 +1,7 @@
 package me.najclark.gll.nn;
 import java.io.Serializable;
 
-public class JNeuron implements Serializable, Comparable<JNeuron>{
+public class Neuron implements Serializable, Comparable<Neuron>{
 	
 	/**
 	 * 
@@ -22,14 +22,14 @@ public class JNeuron implements Serializable, Comparable<JNeuron>{
 	 * {@code public Neuron(double input)}
 	 * @param input - the input of the Neuron.
 	 */
-	public JNeuron(double input){
+	public Neuron(double input){
 		this.input = input;
 	}
 	
 	/**
 	 * {@code public Neuron()}
 	 */
-	public JNeuron(){
+	public Neuron(){
 		this.input = 0;
 	}
 	
@@ -58,7 +58,7 @@ public class JNeuron implements Serializable, Comparable<JNeuron>{
 	}
 
 	@Override
-	public int compareTo(JNeuron o) {
+	public int compareTo(Neuron o) {
 		return Double.compare(input, o.getValue());
 	}
 	

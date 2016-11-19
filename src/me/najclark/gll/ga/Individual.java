@@ -8,7 +8,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Random;
 
-import me.najclark.gll.nn.JNeuralNetwork;
+import me.najclark.gll.nn.NeuralNetwork;
 
 public class Individual implements Comparable<Individual>, Serializable {
 
@@ -22,14 +22,14 @@ public class Individual implements Comparable<Individual>, Serializable {
 	public static int ALL_OPTIONS = 0;
 	public static int SKIP_FIRST = 1;
 	public double fitness = 0;
-	public JNeuralNetwork nn;
+	public NeuralNetwork nn;
 	public String name;
 
 	public Individual() {
-		nn = new JNeuralNetwork();
+		nn = new NeuralNetwork();
 	}
 
-	public Individual(double fitness, JNeuralNetwork nn, String name) {
+	public Individual(double fitness, NeuralNetwork nn, String name) {
 		this.nn = nn;
 		this.fitness = fitness;
 		this.name = name;
@@ -140,7 +140,7 @@ public class Individual implements Comparable<Individual>, Serializable {
 		this.fitness = fitness;
 	}
 
-	public void setNeuralNetwork(JNeuralNetwork nn) {
+	public void setNeuralNetwork(NeuralNetwork nn) {
 		this.nn = nn;
 	}
 
@@ -148,7 +148,7 @@ public class Individual implements Comparable<Individual>, Serializable {
 		return fitness;
 	}
 
-	public JNeuralNetwork getNeuralNetwork() {
+	public NeuralNetwork getNeuralNetwork() {
 		return nn;
 	}
 

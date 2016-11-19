@@ -12,14 +12,14 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
-public class JNetworkPicture implements Serializable{
+public class NetworkPicture implements Serializable{
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 9050528061914777228L;
-	private ArrayList<JLayer> layers;
-	private ArrayList<JWeightGroup> weights;
+	private ArrayList<Layer> layers;
+	private ArrayList<WeightGroup> weights;
 	private Color background = Color.WHITE;
 	private Color nodes = Color.BLACK;
 	private Color lines = Color.BLACK;
@@ -27,16 +27,16 @@ public class JNetworkPicture implements Serializable{
 	private Color text = Color.WHITE;
 	private NumberFormat nf;
 
-	public JNetworkPicture(JNeuralNetwork nn) {
+	public NetworkPicture(NeuralNetwork nn) {
 		update(nn);
 		nf = NumberFormat.getInstance();
 	}
 	
-	public JNetworkPicture() {
+	public NetworkPicture() {
 		nf = NumberFormat.getInstance();
 	}
 
-	public void update(JNeuralNetwork nn) {
+	public void update(NeuralNetwork nn) {
 		this.layers = nn.getLayers();
 		this.weights = nn.getWeightGroups();
 	}
@@ -139,8 +139,8 @@ public class JNetworkPicture implements Serializable{
 		int y = ySpacing / 2;
 
 		for (int layer = 0; layer < layers.size() - 1; layer++) {
-			JLayer l = layers.get(layer);
-			JWeightGroup wg = weights.get(layer);
+			Layer l = layers.get(layer);
+			WeightGroup wg = weights.get(layer);
 			int curXSpacing = (width - nodeDiameter * l.size()) / l.size();
 			int curX = curXSpacing / 2;
 

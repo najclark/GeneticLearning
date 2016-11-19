@@ -8,31 +8,31 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class JNeuralNetwork implements Serializable {
+public class NeuralNetwork implements Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -1676836486914368417L;
-	private ArrayList<JLayer> layers;
-	private ArrayList<JWeightGroup> weights;
+	private ArrayList<Layer> layers;
+	private ArrayList<WeightGroup> weights;
 
 	
 	public void clear(){
-		for(JLayer l : layers){
-			for(JNeuron n : l.getNeurons()){
+		for(Layer l : layers){
+			for(Neuron n : l.getNeurons()){
 				n.setInput(0);
 			}
 		}
 	}
 	
-	public void setLayer(int index, JLayer l){
+	public void setLayer(int index, Layer l){
 		layers.set(index, l);
 	}
 	
 	public int getTotalNeurons(){
 		int total = 0;
-		for(JLayer l : layers){
+		for(Layer l : layers){
 			total += l.getNeurons().length;
 		}
 		return total;
@@ -42,16 +42,16 @@ public class JNeuralNetwork implements Serializable {
 		layers.remove(index);
 	}
 	
-	public void addLayerAt(int index, JLayer l){
+	public void addLayerAt(int index, Layer l){
 		layers.add(index, l);
 	}
 	
-	public JNeuralNetwork(JNeuralNetwork copy){
+	public NeuralNetwork(NeuralNetwork copy){
 		this();
-		for(JLayer l : copy.getLayers()){
-			JLayer newLayer = new JLayer(l.getNeurons().length);
+		for(Layer l : copy.getLayers()){
+			Layer newLayer = new Layer(l.getNeurons().length);
 			int i = 0;
-			for(JNeuron n : l.getNeurons()){
+			for(Neuron n : l.getNeurons()){
 				newLayer.setNeuron(i, n);
 				i++;
 			}
@@ -62,14 +62,14 @@ public class JNeuralNetwork implements Serializable {
 	@Override
 	public String toString(){
 		String output = "[";
-		for(JLayer l : layers){
+		for(Layer l : layers){
 			output += l + ", ";
 		}
 		output += "]";
 		return output;
 	}
 	
-	public void setWeightGroup(int index, JWeightGroup wg){
+	public void setWeightGroup(int index, WeightGroup wg){
 		weights.set(index, wg);
 	}
 	
@@ -99,12 +99,12 @@ public class JNeuralNetwork implements Serializable {
 	 * @param path - The path to the saved NeuralNetwork.
 	 * @return The instance of the saved NeuralNetwork.
 	 */
-	public static JNeuralNetwork openNN(String path) {
-		JNeuralNetwork nn = null;
+	public static NeuralNetwork openNN(String path) {
+		NeuralNetwork nn = null;
 		try {
 			FileInputStream fileIn = new FileInputStream(path);
 			ObjectInputStream in = new ObjectInputStream(fileIn);
-			nn = (JNeuralNetwork) in.readObject();
+			nn = (NeuralNetwork) in.readObject();
 			in.close();
 			fileIn.close();
 			return nn;
@@ -122,7 +122,7 @@ public class JNeuralNetwork implements Serializable {
 	 * 
 	 * @return The ArrayList of layers.
 	 */
-	public ArrayList<JLayer> getLayers() {
+	public ArrayList<Layer> getLayers() {
 		return layers;
 	}
 
@@ -131,7 +131,7 @@ public class JNeuralNetwork implements Serializable {
 	 * 
 	 * @return The ArrayList of the WeightGroups.
 	 */
-	public ArrayList<JWeightGroup> getWeightGroups() {
+	public ArrayList<WeightGroup> getWeightGroups() {
 		return weights;
 	}
 
@@ -141,7 +141,7 @@ public class JNeuralNetwork implements Serializable {
 	 * @param layers
 	 *            - the new ArrayList of Layers.
 	 */
-	public void setLayers(ArrayList<JLayer> layers) {
+	public void setLayers(ArrayList<Layer> layers) {
 		this.layers = layers;
 	}
 
@@ -151,13 +151,13 @@ public class JNeuralNetwork implements Serializable {
 	 * @param weights
 	 *            - the new ArrayList of WeightGroups.
 	 */
-	public void setWeightGroups(ArrayList<JWeightGroup> weights) {
+	public void setWeightGroups(ArrayList<WeightGroup> weights) {
 		this.weights = weights;
 	}
 
-	public JNeuralNetwork() {
-		layers = new ArrayList<JLayer>();
-		weights = new ArrayList<JWeightGroup>();
+	public NeuralNetwork() {
+		layers = new ArrayList<Layer>();
+		weights = new ArrayList<WeightGroup>();
 	}
 
 	/**
@@ -166,7 +166,7 @@ public class JNeuralNetwork implements Serializable {
 	 * @param layer
 	 *            - Layer to be added to the end of the neural network.
 	 */
-	public void addLayer(JLayer layer) {
+	public void addLayer(Layer layer) {
 		layers.add(layer);
 	}
 
@@ -187,7 +187,7 @@ public class JNeuralNetwork implements Serializable {
 			}
 		} else {
 			for (int i = 0; i < layers.size() - 1; i++) {
-				weights.add(JWeightGroup.connectLayers(layers.get(i), layers.get(i + 1)));
+				weights.add(WeightGroup.connectLayers(layers.get(i), layers.get(i + 1)));
 			}
 		}
 	}
@@ -201,8 +201,8 @@ public class JNeuralNetwork implements Serializable {
 	 *             Thrown when the number of inputs and first layer neurons do
 	 *             not match.
 	 */
-	public void setInputs(JLayer l) {
-		JLayer first = layers.get(0);
+	public void setInputs(Layer l) {
+		Layer first = layers.get(0);
 		if (l.size() != first.size()) {
 			throw new ArrayIndexOutOfBoundsException("The number of inputs and first " + "layer neurons don't match");
 		} else {
@@ -221,8 +221,8 @@ public class JNeuralNetwork implements Serializable {
 	public void flush() {
 		// iterate through the layers (not the last one)
 		for (int i = 0; i < layers.size() - 1; i++) {
-			JLayer current = layers.get(i);
-			JLayer next = layers.get(i + 1);
+			Layer current = layers.get(i);
+			Layer next = layers.get(i + 1);
 			// iterate through the Neurons in the next layer
 			for (int neuronNum = 0; neuronNum < next.size(); neuronNum++) {
 				// iterate through the weights associated with that Neuron
@@ -239,7 +239,7 @@ public class JNeuralNetwork implements Serializable {
 					}
 					// sets the Neuron's input to the existing input + the new
 					// input
-					next.setNeuron(neuronNum, new JNeuron(neuronCur + (weights.get(i).getWeights()[weight] * mult)));
+					next.setNeuron(neuronNum, new Neuron(neuronCur + (weights.get(i).getWeights()[weight] * mult)));
 				}
 			}
 		}
@@ -250,12 +250,12 @@ public class JNeuralNetwork implements Serializable {
 	 * 
 	 * @return The output layer.
 	 */
-	public JLayer getOutputs() {
+	public Layer getOutputs() {
 		return layers.get(layers.size() - 1);
 	}
 	
-	public void setInputs(JNeuron[] inputs){
-		JLayer first = layers.get(0);
+	public void setInputs(Neuron[] inputs){
+		Layer first = layers.get(0);
 		if (inputs.length != first.size()) {
 			throw new ArrayIndexOutOfBoundsException("The number of inputs and first " + "layer neurons don't match");
 		} else {
