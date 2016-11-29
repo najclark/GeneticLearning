@@ -15,13 +15,21 @@ public abstract class GeneticAlgorithm {
 	protected ArrayList<Individual> pool;
 	protected Random random = new Random();
 	protected int maxFitness = 0;
-	protected double mutateRate;
+	protected double mutateRate = 0.01;
 	protected int generation = 0;
 	protected double avgFitness = 0;
 	protected double avgNeurons = 0;
-	protected int exponent;
 	protected String output = "";
 
+	public void initialize(double mutateRate){
+		pool = new ArrayList<Individual>();
+		this.mutateRate = mutateRate;
+	}
+	
+	public void initialize(){
+		initialize(mutateRate);
+	}
+	
 	public Individual mutate(Individual ind, double mutateRate) {
 		NeuralNetwork nn = ind.nn;
 		NeuralNetwork mutated = new NeuralNetwork(nn);
@@ -261,15 +269,19 @@ public abstract class GeneticAlgorithm {
 	}
 	
 	public void runGeneration(){
+		selection();
+		
+		makeNewGeneration();
+		
+		clearStats();
+	}
+	
+	public void selection(){
 		for(int i = 0; i < pool.size(); i++){
 			Individual ind = pool.get(i);
 			pool.set(i, new Individual(simulate(ind.nn), ind.nn, ind.name));
 			
 		}
-		
-		makeNewGeneration();
-		
-		clearStats();
 	}
 
 	public abstract double simulate(NeuralNetwork nn);

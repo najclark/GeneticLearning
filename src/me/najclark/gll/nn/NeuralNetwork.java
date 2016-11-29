@@ -30,6 +30,10 @@ public class NeuralNetwork implements Serializable {
 		layers.set(index, l);
 	}
 	
+	public Layer getLayer(int index){
+		return layers.get(index);
+	}
+	
 	public int getTotalNeurons(){
 		int total = 0;
 		for(Layer l : layers){
