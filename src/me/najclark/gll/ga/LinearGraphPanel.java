@@ -179,7 +179,7 @@ public class LinearGraphPanel extends JPanel {
 			pc.addSlice(new Slice(r.nextInt(100), new Color(r.nextInt(255), r.nextInt(255), r.nextInt(255)), String.valueOf(alphabet.charAt(i))));
 		}
 		pc.updateSliceByLabel("n", 100);
-		f.add(pc);
+		f.add(gp);
 		f.setSize(400, 400);
 		f.setLocation(200, 200);
 		f.setVisible(true);
