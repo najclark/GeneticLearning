@@ -33,10 +33,5 @@ public class ActivationFunction {
 	    return 0;
 	}
 	
-	public static void main(String[] args) {
-		ActivationFunction af = ActivationFunction.softsign;
-		System.out.println(af.getOutput(0));
-	}
-	
 	
 }
