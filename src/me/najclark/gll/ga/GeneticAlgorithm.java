@@ -20,6 +20,7 @@ public abstract class GeneticAlgorithm {
 	protected double avgFitness = 0;
 	protected double avgNeurons = 0;
 	protected String output = "";
+	protected boolean specialMutation = true;
 
 	public void initialize(double mutateRate){
 		pool = new ArrayList<Individual>();
@@ -39,7 +40,7 @@ public abstract class GeneticAlgorithm {
 		for (int i = 0; i < nn.getWeightGroups().size(); i++) {
 			WeightGroup wg = mutated.getWeightGroups().get(i);
 			for (int d = 0; d < wg.getWeights().length; d++) {
-				if (random.nextDouble() < mutateRate) {
+				if (random.nextDouble() < mutateRate / nn.getTotalNeurons()) {
 					changed = true;
 					wg.setWeight(d, (random.nextDouble() - 0.5));
 				} else {
@@ -48,9 +49,9 @@ public abstract class GeneticAlgorithm {
 			}
 			mutated.setWeightGroup(i, wg);
 		}
-		if (random.nextDouble() < mutateRate) {
+		if (random.nextDouble() < mutateRate / 10 && specialMutation) { //special mutation
 			changed = true;
-			if (random.nextDouble() < mutateRate * 10) { // Add or remove Layer
+			if (random.nextDouble() < mutateRate / 10) { // Add or remove Layer
 															// to
 				// NeuralNetwork
 				NeuralNetwork changedDesign = new NeuralNetwork(nn);
@@ -218,6 +219,14 @@ public abstract class GeneticAlgorithm {
 			newPool.add(pool.get(i));
 		}
 		return newPool;
+	}
+	
+	public void setSpecialMutation(boolean sm){
+		this.specialMutation = sm;
+	}
+	
+	public boolean getSpecialMutation(){
+		return specialMutation;
 	}
 	
 	public ArrayList<Individual> getSorted(ArrayList<Individual> pool) {

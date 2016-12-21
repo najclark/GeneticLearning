@@ -73,6 +73,13 @@ public class Layer implements Serializable{
 		this(0);
 	}
 	
+	public Layer(int neurons, ActivationFunction af){
+		this.neurons = new ArrayList<Neuron>(neurons);
+		for(int i = 0; i < neurons; i++){
+			this.neurons.add(new Neuron(af));
+		}
+	}
+	
 	/**
 	 * {@code public int size()}
 	 * @return The number of Neurons in the layer.

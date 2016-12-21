@@ -7,7 +7,7 @@ public class Neuron implements Serializable, Comparable<Neuron>{
 	 * 
 	 */
 	private static final long serialVersionUID = -798726926214283987L;
-	private ActivationFunction af;
+	private ActivationFunction af = ActivationFunction.linear;
 	private double input;
 	
 	@Override
@@ -23,19 +23,8 @@ public class Neuron implements Serializable, Comparable<Neuron>{
 	 * {@code public Neuron(double input)}
 	 * @param input - the input of the Neuron.
 	 */
-	public Neuron(double input, ActivationFunction af){
-		this.input = input;
-		this.af = af;
-	}
-	
 	public Neuron(double input){
-		this();
 		this.input = input;
-	}
-	
-	public Neuron(ActivationFunction af){
-		this();
-		this.af = af;
 	}
 	
 	/**
@@ -43,15 +32,17 @@ public class Neuron implements Serializable, Comparable<Neuron>{
 	 */
 	public Neuron(){
 		this.input = 0;
-		this.af = new ActivationFunction("x");
+		this.af = ActivationFunction.linear;
 	}
 	
-	public void setActivationFunction(ActivationFunction af){
+	public Neuron(ActivationFunction af){
+		this();
 		this.af = af;
 	}
 	
-	public ActivationFunction getActivationFunction(){
-		return af;
+	public Neuron(double input, ActivationFunction af){
+		this.input = input;
+		this.af = af;
 	}
 	
 	/**
@@ -72,7 +63,7 @@ public class Neuron implements Serializable, Comparable<Neuron>{
 
 	/**
 	 * {@code public double getOutput()}
-	 * @return The result of the activation function, based on the Neuron's set input.
+	 * @return The result of the ActivationFunction, based on the Neuron's set input.
 	 */
 	public double getOutput(){
 		return af.getOutput(input);

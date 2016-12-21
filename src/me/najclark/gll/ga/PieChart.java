@@ -7,8 +7,6 @@ import java.awt.Rectangle;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 import javax.swing.JComponent;
 
@@ -48,13 +46,18 @@ class PieChart extends JComponent {
 	}
 	
 	public void updateSliceByLabel(String label, double value){
+		boolean found = false;
 		for(int i = 0; i < slices.size(); i++){
 			if(slices.get(i).label.equalsIgnoreCase(label)){
 				Slice s = slices.get(i);
 				s.value = value;
 				slices.set(i, s);
+				found = true;
 				break;
 			}
+		}
+		if(!found){
+			slices.add(new Slice(value, new Color((int)(Math.random() * 0x1000000)), label));
 		}
 	}
 

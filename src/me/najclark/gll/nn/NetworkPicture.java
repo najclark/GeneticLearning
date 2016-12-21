@@ -166,7 +166,7 @@ public class NetworkPicture implements Serializable{
 				g.fillOval(nextX, y + ySpacing + nodeDiameter, nodeDiameter, nodeDiameter);
 				g.setColor(text);
 
-				g.drawString(nf.format(l.getNeuron(w % l.size()).getInput()), curX + nodeDiameter / 2,
+				g.drawString(nf.format(l.getNeuron(w % l.size()).getOutput()), curX + nodeDiameter / 2,
 						y + nodeDiameter / 2);
 				g.drawString(nf.format(layers.get(layer + 1).getNeuron(w / l.size()).getInput()),
 						nextX + nodeDiameter / 2, y + ySpacing + nodeDiameter + nodeDiameter / 2);

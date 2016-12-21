@@ -243,7 +243,7 @@ public class NeuralNetwork implements Serializable {
 					}
 					// sets the Neuron's input to the existing input + the new
 					// input
-					next.setNeuron(neuronNum, new Neuron(neuronCur + (weights.get(i).getWeights()[weight] * mult), next.getNeuron(neuronNum).getActivationFunction()));
+					next.setNeuron(neuronNum, new Neuron(neuronCur + (weights.get(i).getWeights()[weight] * mult)));
 				}
 			}
 		}
