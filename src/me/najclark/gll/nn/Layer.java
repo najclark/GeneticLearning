@@ -1,26 +1,27 @@
 package me.najclark.gll.nn;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class Layer implements Serializable{
+public class Layer implements Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -7915683105488066923L;
 	private ArrayList<Neuron> neurons;
-	
+
 	@Override
-	public String toString(){
+	public String toString() {
 		String output = "{";
-		for(Neuron n : neurons){
+		for (Neuron n : neurons) {
 			output += n + ", ";
 		}
 		output += "}";
 		return output;
 	}
-	
+
 	public Neuron getHighest() {
 		Neuron highest = new Neuron(Double.MIN_VALUE);
 		for (Neuron n : neurons) {
@@ -29,6 +30,15 @@ public class Layer implements Serializable{
 			}
 		}
 		return highest;
+	}
+	
+	public int indexOf(Neuron n){
+		for(int i = 0; i < neurons.size(); i++){
+			if(neurons.get(i) == n){
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	public Neuron getLowest() {
@@ -53,66 +63,84 @@ public class Layer implements Serializable{
 
 		return sorted;
 	}
-	
-	public void addNeuron(Neuron n){
+
+	public void addNeuron(Neuron n) {
 		neurons.add(n);
 	}
-	
+
 	/**
 	 * {@code public Layer(int neurons)}
-	 * @param neurons - The number of neurons in this layer.
+	 * 
+	 * @param neurons
+	 *            - The number of neurons in this layer.
 	 */
-	public Layer(int neurons){
+	public Layer(int neurons) {
 		this.neurons = new ArrayList<Neuron>(neurons);
-		for(int i = 0; i < neurons; i++){
+		for (int i = 0; i < neurons; i++) {
 			this.neurons.add(new Neuron());
 		}
 	}
-	
-	public Layer(){
+
+	public Layer() {
 		this(0);
 	}
-	
-	public Layer(int neurons, ActivationFunction af){
+
+	public Layer(int neurons, ActivationFunction af) {
 		this.neurons = new ArrayList<Neuron>(neurons);
-		for(int i = 0; i < neurons; i++){
+		for (int i = 0; i < neurons; i++) {
 			this.neurons.add(new Neuron(af));
 		}
 	}
-	
+
 	/**
 	 * {@code public int size()}
+	 * 
 	 * @return The number of Neurons in the layer.
 	 */
-	public int size(){
+	public int size() {
 		return neurons.size();
 	}
-	
+
 	/**
 	 * {@code public Neuron[] getNeurons()}
+	 * 
 	 * @return An array of Neurons in the layer.
 	 */
-	public Neuron[] getNeurons(){
+	public Neuron[] getNeurons() {
 		return neurons.toArray(new Neuron[neurons.size()]);
 	}
-	
+
 	/**
 	 * {@code public Neuron getNeuron(int index)}
-	 * @param index - index of the Neuron to return
+	 * 
+	 * @param index
+	 *            - index of the Neuron to return
 	 * @return The Neuron at a given index.
 	 */
-	public Neuron getNeuron(int index){
+	public Neuron getNeuron(int index) {
 		return neurons.get(index);
 	}
-	
+
 	/**
 	 * {@code public void setNeuron(int index, Neuron n)}
-	 * @param index - index of the Neuron to replace.
-	 * @param n - the Neuron to replace the existing Neuron.
+	 * 
+	 * @param index
+	 *            - index of the Neuron to replace.
+	 * @param n
+	 *            - the Neuron to replace the existing Neuron.
 	 */
-	public void setNeuron(int index, Neuron n){
+	public void setNeuron(int index, Neuron n) {
 		neurons.set(index, n);
 	}
-	
-	
+
+	public void setNeurons(Neuron[] neurons) {
+		for (int i = 0; i < neurons.length; i++) {
+			if (i < this.neurons.size()) {
+				this.neurons.set(i, neurons[i]);
+			} else {
+				addNeuron(neurons[i]);
+			}
+		}
+	}
+
 }

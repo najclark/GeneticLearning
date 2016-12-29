@@ -17,69 +17,75 @@ public class NeuralNetwork implements Serializable {
 	private ArrayList<Layer> layers;
 	private ArrayList<WeightGroup> weights;
 
-	
-	public void clear(){
-		for(Layer l : layers){
-			for(Neuron n : l.getNeurons()){
+	public void clear() {
+		for (Layer l : layers) {
+			for (Neuron n : l.getNeurons()) {
 				n.setInput(0);
 			}
 		}
 	}
-	
-	public void setLayer(int index, Layer l){
+
+	public void setLayer(int index, Layer l) {
 		layers.set(index, l);
 	}
-	
-	public Layer getLayer(int index){
+
+	public Layer getLayer(int index) {
 		return layers.get(index);
 	}
-	
-	public int getTotalNeurons(){
+
+	public int getTotalNeurons() {
 		int total = 0;
-		for(Layer l : layers){
+		for (Layer l : layers) {
 			total += l.getNeurons().length;
 		}
 		return total;
 	}
-	
-	public void removeLayer(int index){
+
+	public void removeLayer(int index) {
 		layers.remove(index);
 	}
-	
-	public void addLayerAt(int index, Layer l){
+
+	public void addLayerAt(int index, Layer l) {
 		layers.add(index, l);
 	}
-	
-	public NeuralNetwork(NeuralNetwork copy){
+
+	public NeuralNetwork(NeuralNetwork copy) {
 		this();
-		for(Layer l : copy.getLayers()){
+		for (Layer l : copy.getLayers()) {
 			Layer newLayer = new Layer(l.getNeurons().length);
 			int i = 0;
-			for(Neuron n : l.getNeurons()){
-				newLayer.setNeuron(i, n);
+			for (Neuron n : l.getNeurons()) {
+				Neuron newN = new Neuron(n.getInput(), n.getActivationFunction());
+				newLayer.setNeuron(i, newN);
 				i++;
 			}
 			addLayer(newLayer);
 		}
 	}
-	
+
 	@Override
-	public String toString(){
+	public String toString() {
 		String output = "[";
-		for(Layer l : layers){
+		for (Layer l : layers) {
 			output += l + ", ";
 		}
 		output += "]";
 		return output;
 	}
-	
-	public void setWeightGroup(int index, WeightGroup wg){
+
+	public String getId() {
+		return super.toString();
+	}
+
+	public void setWeightGroup(int index, WeightGroup wg) {
 		weights.set(index, wg);
 	}
-	
+
 	/**
-	 *{@code public boolean saveNN(String path)}
-	 * @param path - The path to where the NeuralNetwork will be saved.
+	 * {@code public boolean saveNN(String path)}
+	 * 
+	 * @param path
+	 *            - The path to where the NeuralNetwork will be saved.
 	 * @return Whether or not the save was successful.
 	 */
 	public boolean saveNN(String path) {
@@ -100,7 +106,9 @@ public class NeuralNetwork implements Serializable {
 
 	/**
 	 * {@code public static NeuralNetwork openNN(String path)}
-	 * @param path - The path to the saved NeuralNetwork.
+	 * 
+	 * @param path
+	 *            - The path to the saved NeuralNetwork.
 	 * @return The instance of the saved NeuralNetwork.
 	 */
 	public static NeuralNetwork openNN(String path) {
@@ -210,8 +218,9 @@ public class NeuralNetwork implements Serializable {
 		if (l.size() != first.size()) {
 			throw new ArrayIndexOutOfBoundsException("The number of inputs and first " + "layer neurons don't match");
 		} else {
-			for (int i = 0; i < l.size(); i++) {
-				first.setNeuron(i, l.getNeuron(i));
+			int i = 0;
+			for(Neuron n : first.getNeurons()){
+				n.setInput(l.getNeuron(i).getInput());
 			}
 			layers.set(0, first);
 		}
@@ -243,7 +252,8 @@ public class NeuralNetwork implements Serializable {
 					}
 					// sets the Neuron's input to the existing input + the new
 					// input
-					next.setNeuron(neuronNum, new Neuron(neuronCur + (weights.get(i).getWeights()[weight] * mult)));
+					next.setNeuron(neuronNum, new Neuron(neuronCur + (weights.get(i).getWeights()[weight] * mult),
+							next.getNeuron(neuronNum).getActivationFunction()));
 				}
 			}
 		}
@@ -257,14 +267,16 @@ public class NeuralNetwork implements Serializable {
 	public Layer getOutputs() {
 		return layers.get(layers.size() - 1);
 	}
-	
-	public void setInputs(Neuron[] inputs){
+
+	public void setInputs(Neuron[] inputs) {
 		Layer first = layers.get(0);
 		if (inputs.length != first.size()) {
 			throw new ArrayIndexOutOfBoundsException("The number of inputs and first " + "layer neurons don't match");
 		} else {
 			for (int i = 0; i < inputs.length; i++) {
-				first.setNeuron(i, inputs[i]);
+				Neuron n = first.getNeuron(i);
+				n.setInput(inputs[i].getInput());
+				first.setNeuron(i, n);
 			}
 			layers.set(0, first);
 		}

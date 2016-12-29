@@ -28,5 +28,10 @@ public class ActivationFunction implements Serializable {
 		//equation = equation.replaceAll("x", String.valueOf(x));
 		return Double.valueOf(String.valueOf(new Expression(equation).with("x", new BigDecimal(x)).eval()));
 	}
+	
+	@Override
+	public String toString(){
+		return equation;
+	}
 
 }

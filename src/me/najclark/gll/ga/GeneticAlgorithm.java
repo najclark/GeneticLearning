@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
+import me.najclark.gll.nn.ActivationFunction;
 import me.najclark.gll.nn.Layer;
 import me.najclark.gll.nn.NeuralNetwork;
 import me.najclark.gll.nn.Neuron;
@@ -49,7 +50,7 @@ public abstract class GeneticAlgorithm {
 			}
 			mutated.setWeightGroup(i, wg);
 		}
-		if (random.nextDouble() < mutateRate / 10 && specialMutation) { //special mutation
+		if (random.nextDouble() < mutateRate && specialMutation) { //special mutation
 			changed = true;
 			if (random.nextDouble() < mutateRate / 10) { // Add or remove Layer
 															// to
@@ -81,7 +82,7 @@ public abstract class GeneticAlgorithm {
 					int deltaNeurons = pickMutationLevel();
 					if (random.nextBoolean()) {
 						for (int i = 0; i < deltaNeurons; i++) {
-							l.addNeuron(new Neuron());
+							l.addNeuron(new Neuron(ActivationFunction.sigmoid));
 						}
 					} else {
 						l = new Layer();
@@ -285,11 +286,35 @@ public abstract class GeneticAlgorithm {
 		clearStats();
 	}
 	
-	public void selection(){
-		for(int i = 0; i < pool.size(); i++){
-			Individual ind = pool.get(i);
-			pool.set(i, new Individual(simulate(ind.nn), ind.nn, ind.name));
+	public void selection() {
+		
+		class SimThread implements Runnable {
+			private int poolId;
+			public SimThread(int poolId) {
+				this.poolId = poolId;
+			}
 			
+			public void run() {
+				Individual ind = pool.get(this.poolId);
+				pool.set(this.poolId, new Individual(simulate(ind.nn), ind.nn, ind.name));
+			}
+		}
+		
+		Thread[] thread = new Thread[pool.size()];
+		
+		// Create and start threads
+		for (int i = 0; i < pool.size(); i++) {
+			thread[i] = new Thread(new SimThread(i));
+			thread[i].start();			
+		}
+		
+		// Wait for threads to complete by joining
+		for (int i = 0; i < pool.size(); i++) {
+			try {
+				thread[i].join();
+			} catch (InterruptedException e) {
+				System.out.println(e.toString());
+			}
 		}
 	}
 

@@ -1,4 +1,5 @@
 package me.najclark.gll.nn;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
-public class NetworkPicture implements Serializable{
+public class NetworkPicture implements Serializable {
 
 	/**
 	 * 
@@ -31,7 +32,7 @@ public class NetworkPicture implements Serializable{
 		update(nn);
 		nf = NumberFormat.getInstance();
 	}
-	
+
 	public NetworkPicture() {
 		nf = NumberFormat.getInstance();
 	}
@@ -40,77 +41,86 @@ public class NetworkPicture implements Serializable{
 		this.layers = nn.getLayers();
 		this.weights = nn.getWeightGroups();
 	}
-	
+
 	/**
 	 * {@code public void setMaximumFractionDigits(int num)}
 	 * 
-	 * @param num - The maximum fraction digits.
+	 * @param num
+	 *            - The maximum fraction digits.
 	 */
-	public void setMaximumFractionDigits(int num){
+	public void setMaximumFractionDigits(int num) {
 		nf.setMaximumFractionDigits(num);
 	}
-	
+
 	/**
 	 * {@code public void setMinimumFractionDigits(int num)}
 	 * 
-	 * @param num - The minimum fraction digits.
+	 * @param num
+	 *            - The minimum fraction digits.
 	 */
-	public void setMinimumFractionDigits(int num){
+	public void setMinimumFractionDigits(int num) {
 		nf.setMinimumFractionDigits(num);
 	}
-	
+
 	/**
 	 * {@code public void setBackground(Color c)}
 	 * 
-	 * @param c - The Color of the background.
+	 * @param c
+	 *            - The Color of the background.
 	 */
-	public void setBackground(Color c){
+	public void setBackground(Color c) {
 		background = c;
 	}
-	
+
 	/**
 	 * {@code public void setNodes(Color c)}
 	 * 
-	 * @param c - The Color of the nodes.
+	 * @param c
+	 *            - The Color of the nodes.
 	 */
-	public void setNodes(Color c){
+	public void setNodes(Color c) {
 		nodes = c;
 	}
 
 	/**
 	 * {@code public void setLines(Color c)}
 	 * 
-	 * @param c - The Color of the lines.
+	 * @param c
+	 *            - The Color of the lines.
 	 */
-	public void setLines(Color c){
+	public void setLines(Color c) {
 		lines = c;
 	}
-	
+
 	/**
 	 * {@code public void setNegativeLines(Color c)}
 	 * 
-	 * @param c - The Color of the negative lines.
+	 * @param c
+	 *            - The Color of the negative lines.
 	 */
-	public void setNegativeLines(Color c){
+	public void setNegativeLines(Color c) {
 		negativeLines = c;
 	}
-	
+
 	/**
 	 * {@code public void setText(Color c)}
 	 * 
-	 * @param c - The Color of the text.
+	 * @param c
+	 *            - The Color of the text.
 	 */
-	public void setText(Color c){
+	public void setText(Color c) {
 		text = c;
 	}
-	
+
 	/**
 	 * {@code public void saveImage(BufferedImage image, String path)}
 	 * 
-	 * @param image - The image to save.
-	 * @param path - The path to where to save the file.
+	 * @param image
+	 *            - The image to save.
+	 * @param path
+	 *            - The path to where to save the file.
 	 */
-	public void saveImage(BufferedImage image, String path){
+	public void saveImage(BufferedImage image, String path) {
 		try {
 			File outputfile = new File(path);
 			ImageIO.write(image, "jpg", outputfile);
@@ -122,9 +132,12 @@ public class NetworkPicture implements Serializable{
 	/**
 	 * {@code public BufferedImage getNetworkImage(int width, int height, int nodeDiameter)}
 	 * 
-	 * @param width - The width of the image.
-	 * @param height - The height of the image.
-	 * @param nodeDiameter - The size of the nodes.
+	 * @param width
+	 *            - The width of the image.
+	 * @param height
+	 *            - The height of the image.
+	 * @param nodeDiameter
+	 *            - The size of the nodes.
 	 * @return A BufferedImage that represents the NeuralNetwork.
 	 */
 	public BufferedImage getNetworkImage(int width, int height, int nodeDiameter) {
@@ -135,7 +148,7 @@ public class NetworkPicture implements Serializable{
 		g.fillRect(0, 0, width, height);
 		g.setColor(nodes);
 
-		int ySpacing = (height - nodeDiameter * (layers.size()+1)) / layers.size();
+		int ySpacing = (height - nodeDiameter * (layers.size() + 1)) / layers.size();
 		int y = ySpacing / 2;
 
 		for (int layer = 0; layer < layers.size() - 1; layer++) {
@@ -154,23 +167,28 @@ public class NetworkPicture implements Serializable{
 				}
 
 				g.setColor(lines);
-				if(ws[w] < 0){
+				if (ws[w] < 0) {
 					g.setColor(negativeLines);
 				}
 				g.setStroke(new BasicStroke((int) (Math.abs(ws[w]) * nodeDiameter / 10)));
-				g.draw(new Line2D.Float(curX + nodeDiameter / 2, y + (int)(nodeDiameter * 0.9), nextX + nodeDiameter / 2,
-						y + ySpacing + nodeDiameter + nodeDiameter / 10));
+				g.draw(new Line2D.Float(curX + nodeDiameter / 2, y + (int) (nodeDiameter * 0.9),
+						nextX + nodeDiameter / 2, y + ySpacing + nodeDiameter + nodeDiameter / 10));
 
 				g.setColor(nodes);
 				g.fillOval(curX, y, nodeDiameter, nodeDiameter);
 				g.fillOval(nextX, y + ySpacing + nodeDiameter, nodeDiameter, nodeDiameter);
 				g.setColor(text);
 
+				g.drawString(nf.format(l.getNeuron(w % l.size()).getInput()), curX + nodeDiameter / 2,
+						y + nodeDiameter / 4);
 				g.drawString(nf.format(l.getNeuron(w % l.size()).getOutput()), curX + nodeDiameter / 2,
-						y + nodeDiameter / 2);
-				g.drawString(nf.format(layers.get(layer + 1).getNeuron(w / l.size()).getInput()),
-						nextX + nodeDiameter / 2, y + ySpacing + nodeDiameter + nodeDiameter / 2);
+						y + (nodeDiameter / 4) * 3);
 
+				g.drawString(nf.format(layers.get(layer + 1).getNeuron(w / l.size()).getInput()),
+						nextX + nodeDiameter / 2, y + ySpacing + nodeDiameter + nodeDiameter / 4);
+
+				g.drawString(nf.format(layers.get(layer + 1).getNeuron(w / l.size()).getOutput()),
+						nextX + nodeDiameter / 2, y + ySpacing + nodeDiameter + 3 * (nodeDiameter / 4));
 
 				curX += curXSpacing + nodeDiameter;
 			}
