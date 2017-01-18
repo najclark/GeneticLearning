@@ -22,16 +22,17 @@ public abstract class GeneticAlgorithm {
 	protected double avgNeurons = 0;
 	protected String output = "";
 	protected boolean specialMutation = true;
+	protected boolean isMultiThreaded = true;
 
-	public void initialize(double mutateRate){
+	public void initialize(double mutateRate) {
 		pool = new ArrayList<Individual>();
 		this.mutateRate = mutateRate;
 	}
-	
-	public void initialize(){
+
+	public void initialize() {
 		initialize(mutateRate);
 	}
-	
+
 	public Individual mutate(Individual ind, double mutateRate) {
 		NeuralNetwork nn = ind.nn;
 		NeuralNetwork mutated = new NeuralNetwork(nn);
@@ -50,7 +51,8 @@ public abstract class GeneticAlgorithm {
 			}
 			mutated.setWeightGroup(i, wg);
 		}
-		if (random.nextDouble() < mutateRate && specialMutation) { //special mutation
+		if (random.nextDouble() < mutateRate && specialMutation) { // special
+																	// mutation
 			changed = true;
 			if (random.nextDouble() < mutateRate / 10) { // Add or remove Layer
 															// to
@@ -109,9 +111,9 @@ public abstract class GeneticAlgorithm {
 				}
 			}
 		}
-		
+
 		String mutatedName = ind.name;
-		if(changed){
+		if (changed) {
 			mutatedName = Individual.mutateName(ind.name, 1, Individual.SKIP_FIRST);
 		}
 		return new Individual(0, mutated, mutatedName);
@@ -221,15 +223,15 @@ public abstract class GeneticAlgorithm {
 		}
 		return newPool;
 	}
-	
-	public void setSpecialMutation(boolean sm){
+
+	public void setSpecialMutation(boolean sm) {
 		this.specialMutation = sm;
 	}
-	
-	public boolean getSpecialMutation(){
+
+	public boolean getSpecialMutation() {
 		return specialMutation;
 	}
-	
+
 	public ArrayList<Individual> getSorted(ArrayList<Individual> pool) {
 		Collections.sort(pool);
 		return pool;
@@ -238,7 +240,7 @@ public abstract class GeneticAlgorithm {
 	public ArrayList<Individual> getMatingPool() {
 		return matingPool;
 	}
-	
+
 	public Individual getBestIndividual() {
 		return getSorted(pool).get(0);
 	}
@@ -255,6 +257,14 @@ public abstract class GeneticAlgorithm {
 		return avgNeurons;
 	}
 
+	public void setIsMultiThreaded(boolean isMultiThreaded) {
+		this.isMultiThreaded = isMultiThreaded;
+	}
+
+	public boolean getIsMultiThreaded() {
+		return isMultiThreaded;
+	}
+
 	public int getGeneration() {
 		return generation;
 	}
@@ -262,7 +272,7 @@ public abstract class GeneticAlgorithm {
 	public String getOutput() {
 		return output;
 	}
-	
+
 	public String progressBar(int progress) {
 		String percent = "|";
 		for (int i = 0; i < 10; i++) {
@@ -277,51 +287,60 @@ public abstract class GeneticAlgorithm {
 		percent += "|\r";
 		return percent;
 	}
-	
-	public void runGeneration(){
+
+	public void runGeneration() {
 		selection();
-		
+
 		makeNewGeneration();
-		
+
 		clearStats();
 	}
-	
+
 	public void selection() {
-		
-		class SimThread implements Runnable {
-			private int poolId;
-			public SimThread(int poolId) {
-				this.poolId = poolId;
+
+		if (isMultiThreaded) {
+			class SimThread implements Runnable {
+				private int poolId;
+
+				public SimThread(int poolId) {
+					this.poolId = poolId;
+				}
+
+				public void run() {
+					Individual ind = pool.get(this.poolId);
+					pool.set(this.poolId, new Individual(simulate(ind.nn), ind.nn, ind.name));
+				}
 			}
-			
-			public void run() {
-				Individual ind = pool.get(this.poolId);
-				pool.set(this.poolId, new Individual(simulate(ind.nn), ind.nn, ind.name));
+
+			Thread[] thread = new Thread[pool.size()];
+
+			// Create and start threads
+			for (int i = 0; i < pool.size(); i++) {
+				thread[i] = new Thread(new SimThread(i));
+				thread[i].start();
+			}
+
+			// Wait for threads to complete by joining
+			for (int i = 0; i < pool.size(); i++) {
+				try {
+					thread[i].join();
+				} catch (InterruptedException e) {
+					System.out.println(e.toString());
+				}
+			}
+		} else {
+			for (int i = 0; i < pool.size(); i++) {
+				Individual ind = pool.get(i);
+				pool.set(i, new Individual(simulate(ind.nn), ind.nn, ind.name));
 			}
 		}
-		
-		Thread[] thread = new Thread[pool.size()];
-		
-		// Create and start threads
-		for (int i = 0; i < pool.size(); i++) {
-			thread[i] = new Thread(new SimThread(i));
-			thread[i].start();			
-		}
-		
-		// Wait for threads to complete by joining
-		for (int i = 0; i < pool.size(); i++) {
-			try {
-				thread[i].join();
-			} catch (InterruptedException e) {
-				System.out.println(e.toString());
-			}
-		}
+
 	}
 
 	public abstract double simulate(NeuralNetwork nn);
-	
+
 	public abstract void makeNewGeneration();
-	
+
 	public abstract void clearStats();
 
 }
