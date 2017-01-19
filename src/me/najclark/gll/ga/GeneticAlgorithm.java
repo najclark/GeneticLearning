@@ -339,7 +339,18 @@ public abstract class GeneticAlgorithm {
 
 	public abstract double simulate(NeuralNetwork nn);
 
-	public abstract void makeNewGeneration();
+	public void makeNewGeneration(){
+		ArrayList<Individual> newPop = new ArrayList<Individual>();
+		populateMatingPool(pool);
+		for(int i = 0; i < pool.size(); i++){
+			Individual p1 = pickParent(null, 0);
+			Individual p2 = pickParent(p1, 0);
+			Individual child = mutate(crossover(p1, p2), mutateRate);
+			newPop.add(child);
+		}
+		pool.clear();
+		pool.addAll(newPop);
+	}
 
 	public abstract void clearStats();
 
