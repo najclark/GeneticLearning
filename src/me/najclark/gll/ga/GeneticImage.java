@@ -14,6 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import me.najclark.gll.nn.NetworkPicture;
+import me.najclark.gll.nn.NeuralNetwork;
 
 public class GeneticImage {
 
@@ -50,11 +51,11 @@ public class GeneticImage {
 		
 		JPanel bottom = new JPanel(new GridLayout(1, 3));
 		main.add(bottom, BorderLayout.PAGE_END);
-		np.update(best.nn);
+		np.update((NeuralNetwork)best.pt);
 		bottom.add(new JLabel(new ImageIcon(np.getNetworkImage(bottom.getWidth()/3, bottom.getHeight(), 6))));
-		np.update(median.nn);
+		np.update((NeuralNetwork)median.pt);
 		bottom.add(new JLabel(new ImageIcon(np.getNetworkImage(bottom.getWidth()/3, bottom.getHeight(), 6))));
-		np.update(worst.nn);
+		np.update((NeuralNetwork)worst.pt);
 		bottom.add(new JLabel(new ImageIcon(np.getNetworkImage(bottom.getWidth()/3, bottom.getHeight(), 6))));
 		
 		return getScreenShot(main);

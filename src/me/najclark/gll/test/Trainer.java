@@ -10,7 +10,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-import me.najclark.gll.ga.GeneticAlgorithm;
+import me.najclark.gll.ga.NNGA;
 import me.najclark.gll.ga.Individual;
 import me.najclark.gll.nn.ActivationFunction;
 import me.najclark.gll.nn.Layer;
@@ -18,7 +18,7 @@ import me.najclark.gll.nn.NetworkPicture;
 import me.najclark.gll.nn.NeuralNetwork;
 import me.najclark.gll.nn.Neuron;
 
-public class Trainer extends GeneticAlgorithm {
+public class Trainer extends NNGA {
 
 	public static void main(String[] args) {
 		new Trainer().run();
@@ -60,7 +60,7 @@ public class Trainer extends GeneticAlgorithm {
 			selection();
 
 			Individual ind = getBestIndividual();
-			np.update(ind.nn);
+			np.update((NeuralNetwork)ind.pt);
 			BufferedImage img = np.getNetworkImage(frame.getWidth(), frame.getHeight(), 60);
 			Graphics g = img.getGraphics();
 			g.setColor(Color.black);
@@ -103,7 +103,7 @@ public class Trainer extends GeneticAlgorithm {
 		avgNeurons = 0;
 		for (int i = 0; i < pool.size(); i++) {
 			avgFitness += pool.get(i).fitness;
-			avgNeurons += pool.get(i).nn.getTotalNeurons();
+			avgNeurons += ((NeuralNetwork)pool.get(i).pt).getTotalNeurons();
 		}
 
 		avgFitness /= pool.size();

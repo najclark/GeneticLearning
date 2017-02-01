@@ -22,15 +22,15 @@ public class Individual implements Comparable<Individual>, Serializable {
 	public static int ALL_OPTIONS = 0;
 	public static int SKIP_FIRST = 1;
 	public double fitness = 0;
-	public NeuralNetwork nn;
+	public Phenotype pt;
 	public String name;
 
 	public Individual() {
-		nn = new NeuralNetwork();
+		pt = new Phenotype();
 	}
 
-	public Individual(double fitness, NeuralNetwork nn, String name) {
-		this.nn = nn;
+	public Individual(double fitness, Phenotype pt, String name) {
+		this.pt = pt;
 		this.fitness = fitness;
 		this.name = name;
 	}
@@ -140,16 +140,16 @@ public class Individual implements Comparable<Individual>, Serializable {
 		this.fitness = fitness;
 	}
 
-	public void setNeuralNetwork(NeuralNetwork nn) {
-		this.nn = nn;
+	public void setPhenotypek(Phenotype pt) {
+		this.pt = pt;
 	}
 
 	public double getFitness() {
 		return fitness;
 	}
 
-	public NeuralNetwork getNeuralNetwork() {
-		return nn;
+	public Phenotype getPhenotype() {
+		return pt;
 	}
 
 	@Override

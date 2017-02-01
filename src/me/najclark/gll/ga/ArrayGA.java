@@ -10,7 +10,7 @@ import me.najclark.gll.nn.NeuralNetwork;
 import me.najclark.gll.nn.Neuron;
 import me.najclark.gll.nn.WeightGroup;
 
-public abstract class GeneticAlgorithm {
+public abstract class ArrayGA {
 
 	private ArrayList<Individual> matingPool = new ArrayList<Individual>();
 	protected ArrayList<Individual> pool;
@@ -19,7 +19,6 @@ public abstract class GeneticAlgorithm {
 	protected double mutateRate = 0.01;
 	protected int generation = 0;
 	protected double avgFitness = 0;
-	protected double avgNeurons = 0;
 	protected String output = "";
 	protected boolean specialMutation = true;
 	protected boolean isMultiThreaded = true;
@@ -34,7 +33,7 @@ public abstract class GeneticAlgorithm {
 	}
 
 	public Individual mutate(Individual ind, double mutateRate) {
-		NeuralNetwork nn = ind.nn;
+		NeuralNetwork nn = (NeuralNetwork) ind.pt;
 		NeuralNetwork mutated = new NeuralNetwork(nn);
 		mutated.makeWeightGroups();
 		boolean changed = false;
@@ -125,8 +124,8 @@ public abstract class GeneticAlgorithm {
 	}
 
 	public Individual crossover(Individual ind, Individual ind2) {
-		NeuralNetwork nn = ind.nn;
-		NeuralNetwork nn2 = ind2.nn;
+		NeuralNetwork nn = (NeuralNetwork) ind.pt;
+		NeuralNetwork nn2 = (NeuralNetwork) ind2.pt;
 		NeuralNetwork crossed;
 		NeuralNetwork copied;
 		if (random.nextBoolean()) {
@@ -177,11 +176,11 @@ public abstract class GeneticAlgorithm {
 			double key = partner.fitness;
 
 			if (r < key) {
-				return partner.nn;
+				return (NeuralNetwork) partner.pt;
 			}
 			besafe++;
 		}
-		return pool.get(0).nn;
+		return (NeuralNetwork) pool.get(0).pt;
 
 	}
 
@@ -308,7 +307,8 @@ public abstract class GeneticAlgorithm {
 
 				public void run() {
 					Individual ind = pool.get(this.poolId);
-					pool.set(this.poolId, new Individual(simulate(ind.nn), ind.nn, ind.name));
+					pool.set(this.poolId,
+							new Individual(simulate((NeuralNetwork) ind.pt), (NeuralNetwork) ind.pt, ind.name));
 				}
 			}
 
@@ -331,7 +331,7 @@ public abstract class GeneticAlgorithm {
 		} else {
 			for (int i = 0; i < pool.size(); i++) {
 				Individual ind = pool.get(i);
-				pool.set(i, new Individual(simulate(ind.nn), ind.nn, ind.name));
+				pool.set(i, new Individual(simulate((NeuralNetwork)ind.pt), (NeuralNetwork)ind.pt, ind.name));
 			}
 		}
 

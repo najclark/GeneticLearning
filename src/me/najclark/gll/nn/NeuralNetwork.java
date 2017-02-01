@@ -8,7 +8,9 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class NeuralNetwork implements Serializable {
+import me.najclark.gll.ga.Phenotype;
+
+public class NeuralNetwork extends Phenotype implements Serializable {
 
 	/**
 	 * 
