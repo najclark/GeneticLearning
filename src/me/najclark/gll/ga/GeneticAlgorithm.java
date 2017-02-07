@@ -10,30 +10,29 @@ import me.najclark.gll.nn.NeuralNetwork;
 import me.najclark.gll.nn.Neuron;
 import me.najclark.gll.nn.WeightGroup;
 
-public abstract class ArrayGA {
+public abstract class GeneticAlgorithm {
 
-	private ArrayList<Individual> matingPool = new ArrayList<Individual>();
-	protected ArrayList<Individual> pool;
+	private ArrayList<Phenotype> matingPool = new ArrayList<Phenotype>();
+	protected ArrayList<Phenotype> pool;
 	protected Random random = new Random();
 	protected int maxFitness = 0;
 	protected double mutateRate = 0.01;
 	protected int generation = 0;
 	protected double avgFitness = 0;
 	protected String output = "";
-	protected boolean specialMutation = true;
 	protected boolean isMultiThreaded = true;
 
-	public void initialize(double mutateRate) {
-		pool = new ArrayList<Individual>();
+	public GeneticAlgorithm(double mutateRate){
+		pool = new ArrayList<Phenotype>();
 		this.mutateRate = mutateRate;
 	}
-
-	public void initialize() {
-		initialize(mutateRate);
+	
+	public GeneticAlgorithm(){
+		this(0);
 	}
-
-	public Individual mutate(Individual ind, double mutateRate) {
-		NeuralNetwork nn = (NeuralNetwork) ind.pt;
+	
+	public Phenotype mutate(Phenotype ind, double mutateRate) {
+		NeuralNetwork nn = (NeuralNetwork) ind.gt;
 		NeuralNetwork mutated = new NeuralNetwork(nn);
 		mutated.makeWeightGroups();
 		boolean changed = false;
@@ -50,7 +49,7 @@ public abstract class ArrayGA {
 			}
 			mutated.setWeightGroup(i, wg);
 		}
-		if (random.nextDouble() < mutateRate && specialMutation) { // special
+		if (random.nextDouble() < mutateRate) { // special
 																	// mutation
 			changed = true;
 			if (random.nextDouble() < mutateRate / 10) { // Add or remove Layer
@@ -72,7 +71,7 @@ public abstract class ArrayGA {
 					changedDesign.removeLayer(index);
 				}
 				changedDesign.makeWeightGroups();
-				return new Individual(0, changedDesign, ind.name);
+				return new Phenotype(0, changedDesign, ind.name);
 			} else { // Add or remove a neuron from a layer
 				NeuralNetwork changedDesign = new NeuralNetwork(nn);
 				if (nn.getLayers().size() > 2) {
@@ -106,16 +105,16 @@ public abstract class ArrayGA {
 						}
 						changedDesign.setWeightGroup(w, newWg);
 					}
-					return new Individual(0, changedDesign, ind.name);
+					return new Phenotype(0, changedDesign, ind.name);
 				}
 			}
 		}
 
 		String mutatedName = ind.name;
 		if (changed) {
-			mutatedName = Individual.mutateName(ind.name, 1, Individual.SKIP_FIRST);
+			mutatedName = Phenotype.mutateName(ind.name, 1, Phenotype.SKIP_FIRST);
 		}
-		return new Individual(0, mutated, mutatedName);
+		return new Phenotype(0, mutated, mutatedName);
 	}
 
 	private int pickMutationLevel() {
@@ -123,9 +122,9 @@ public abstract class ArrayGA {
 		return bin[random.nextInt(bin.length)];
 	}
 
-	public Individual crossover(Individual ind, Individual ind2) {
-		NeuralNetwork nn = (NeuralNetwork) ind.pt;
-		NeuralNetwork nn2 = (NeuralNetwork) ind2.pt;
+	public Phenotype crossover(Phenotype ind, Phenotype ind2) {
+		NeuralNetwork nn = (NeuralNetwork) ind.gt;
+		NeuralNetwork nn2 = (NeuralNetwork) ind2.gt;
 		NeuralNetwork crossed;
 		NeuralNetwork copied;
 		if (random.nextBoolean()) {
@@ -163,30 +162,30 @@ public abstract class ArrayGA {
 			crossed.setWeightGroup(i, newWg);
 			i++;
 		}
-		return new Individual(0, crossed, Individual.mixNames(ind.name, ind2.name));
+		return new Phenotype(0, crossed, Phenotype.mixNames(ind.name, ind2.name));
 	}
 
-	public NeuralNetwork acceptReject(ArrayList<Individual> pool, int maxFitness) {
+	public Genotype acceptReject(ArrayList<Phenotype> pool, int maxFitness) {
 		Random random = new Random();
 		int besafe = 0;
 		while (besafe < 10000) {
 			int index = random.nextInt(pool.size());
-			Individual partner = pool.get(index);
+			Phenotype partner = pool.get(index);
 			int r = random.nextInt(maxFitness);
 			double key = partner.fitness;
 
 			if (r < key) {
-				return (NeuralNetwork) partner.pt;
+				return partner.gt;
 			}
 			besafe++;
 		}
-		return (NeuralNetwork) pool.get(0).pt;
+		return pool.get(0).gt;
 
 	}
 
-	public Individual pickParent(Individual not, int iteration) {
+	public Phenotype pickParent(Phenotype not, int iteration) {
 		// System.out.println(matingPool.size());
-		Individual parent = matingPool.get(random.nextInt(matingPool.size()));
+		Phenotype parent = matingPool.get(random.nextInt(matingPool.size()));
 		if (iteration > 100) {
 			return parent;
 		} else if (parent == not) {
@@ -196,17 +195,17 @@ public abstract class ArrayGA {
 		}
 	}
 
-	public void populateMatingPool(ArrayList<Individual> pool) {
+	public void populateMatingPool(ArrayList<Phenotype> pool) {
 		matingPool.clear();
 		double lowest = Double.MAX_VALUE; // So lowest fitness = 0
-		for (Individual hash : pool) {
+		for (Phenotype hash : pool) {
 			double fitness = hash.fitness;
 			if (fitness < lowest) {
 				lowest = fitness;
 			}
 		}
 
-		for (Individual hash : pool) {
+		for (Phenotype hash : pool) {
 			double fitness = hash.fitness;
 			for (int i = 0; i < fitness + Math.abs(lowest) + 1; i++) {
 				matingPool.add(hash);
@@ -214,46 +213,34 @@ public abstract class ArrayGA {
 		}
 	}
 
-	public ArrayList<Individual> getHighestHalf(ArrayList<Individual> pool) {
+	public ArrayList<Phenotype> getHighestHalf(ArrayList<Phenotype> pool) {
 		Collections.sort(pool);
-		ArrayList<Individual> newPool = new ArrayList<Individual>();
+		ArrayList<Phenotype> newPool = new ArrayList<Phenotype>();
 		for (int i = 0; i < pool.size() / 2; i++) {
 			newPool.add(pool.get(i));
 		}
 		return newPool;
 	}
 
-	public void setSpecialMutation(boolean sm) {
-		this.specialMutation = sm;
-	}
-
-	public boolean getSpecialMutation() {
-		return specialMutation;
-	}
-
-	public ArrayList<Individual> getSorted(ArrayList<Individual> pool) {
+	public ArrayList<Phenotype> getSorted(ArrayList<Phenotype> pool) {
 		Collections.sort(pool);
 		return pool;
 	}
 
-	public ArrayList<Individual> getMatingPool() {
+	public ArrayList<Phenotype> getMatingPool() {
 		return matingPool;
 	}
 
-	public Individual getBestIndividual() {
+	public Phenotype getBestIndividual() {
 		return getSorted(pool).get(0);
 	}
 
-	public ArrayList<Individual> getPopulation() {
+	public ArrayList<Phenotype> getPopulation() {
 		return pool;
 	}
 
 	public double getAvgFitness() {
 		return avgFitness;
-	}
-
-	public double getAvgNeurons() {
-		return avgNeurons;
 	}
 
 	public void setIsMultiThreaded(boolean isMultiThreaded) {
@@ -306,9 +293,9 @@ public abstract class ArrayGA {
 				}
 
 				public void run() {
-					Individual ind = pool.get(this.poolId);
+					Phenotype ind = pool.get(this.poolId);
 					pool.set(this.poolId,
-							new Individual(simulate((NeuralNetwork) ind.pt), (NeuralNetwork) ind.pt, ind.name));
+							new Phenotype(simulate((NeuralNetwork) ind.gt), (NeuralNetwork) ind.gt, ind.name));
 				}
 			}
 
@@ -330,8 +317,8 @@ public abstract class ArrayGA {
 			}
 		} else {
 			for (int i = 0; i < pool.size(); i++) {
-				Individual ind = pool.get(i);
-				pool.set(i, new Individual(simulate((NeuralNetwork)ind.pt), (NeuralNetwork)ind.pt, ind.name));
+				Phenotype ind = pool.get(i);
+				pool.set(i, new Phenotype(simulate((NeuralNetwork)ind.gt), (NeuralNetwork)ind.gt, ind.name));
 			}
 		}
 

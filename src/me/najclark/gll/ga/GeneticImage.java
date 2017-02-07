@@ -28,20 +28,20 @@ public class GeneticImage {
 		pc = new PieChart();
 	}
 	
-	public BufferedImage getImage(ArrayList<Individual> inds, Dimension d){
+	public BufferedImage getImage(ArrayList<Phenotype> inds, Dimension d){
 		JPanel main = new JPanel(new BorderLayout());
 		main.setSize(d);
 
-		Individual best = getBest(inds);
-		Individual median = getMedian(inds);
-		Individual worst = getWorst(inds);
+		Phenotype best = getBest(inds);
+		Phenotype median = getMedian(inds);
+		Phenotype worst = getWorst(inds);
 		
 		gp.addPoint(new Color(46, 204, 113), best.fitness); //green
 		gp.addPoint(new Color(241, 196, 15), median.fitness); //yellow
 		gp.addPoint(new Color(231, 76, 60), worst.fitness); //red
 		
 		ArrayList<String> startingLetters = new ArrayList<String>();
-		for(Individual i : inds){
+		for(Phenotype i : inds){
 			startingLetters.add(i.name.substring(0, 1));
 		}
 		populatePieChart(startingLetters);
@@ -51,11 +51,11 @@ public class GeneticImage {
 		
 		JPanel bottom = new JPanel(new GridLayout(1, 3));
 		main.add(bottom, BorderLayout.PAGE_END);
-		np.update((NeuralNetwork)best.pt);
+		np.update((NeuralNetwork)best.gt);
 		bottom.add(new JLabel(new ImageIcon(np.getNetworkImage(bottom.getWidth()/3, bottom.getHeight(), 6))));
-		np.update((NeuralNetwork)median.pt);
+		np.update((NeuralNetwork)median.gt);
 		bottom.add(new JLabel(new ImageIcon(np.getNetworkImage(bottom.getWidth()/3, bottom.getHeight(), 6))));
-		np.update((NeuralNetwork)worst.pt);
+		np.update((NeuralNetwork)worst.gt);
 		bottom.add(new JLabel(new ImageIcon(np.getNetworkImage(bottom.getWidth()/3, bottom.getHeight(), 6))));
 		
 		return getScreenShot(main);
@@ -85,11 +85,11 @@ public class GeneticImage {
 		}
 	}
 	
-	private Individual getBest(ArrayList<Individual> inds){
+	private Phenotype getBest(ArrayList<Phenotype> inds){
 		double fitness = Double.MIN_VALUE;
-		Individual best = new Individual();
+		Phenotype best = new Phenotype();
 		for(int i = 0; i < inds.size(); i++){
-			Individual cur = inds.get(i);
+			Phenotype cur = inds.get(i);
 			if(cur.fitness > fitness){
 				fitness = cur.fitness;
 				best = cur;
@@ -98,11 +98,11 @@ public class GeneticImage {
 		return best;
 	}
 	
-	private Individual getWorst(ArrayList<Individual> inds){
+	private Phenotype getWorst(ArrayList<Phenotype> inds){
 		double fitness = Double.MAX_VALUE;
-		Individual worst = new Individual();
+		Phenotype worst = new Phenotype();
 		for(int i = 0; i < inds.size(); i++){
-			Individual cur = inds.get(i);
+			Phenotype cur = inds.get(i);
 			if(cur.fitness < fitness){
 				fitness = cur.fitness;
 				worst = cur;
@@ -111,8 +111,8 @@ public class GeneticImage {
 		return worst;
 	}
 	
-	private Individual getMedian(ArrayList<Individual> inds){
-		ArrayList<Individual> clone = new ArrayList<Individual>();
+	private Phenotype getMedian(ArrayList<Phenotype> inds){
+		ArrayList<Phenotype> clone = new ArrayList<Phenotype>();
 		clone.addAll(inds);
 		Collections.sort(clone);
 		return clone.get(clone.size()/2);

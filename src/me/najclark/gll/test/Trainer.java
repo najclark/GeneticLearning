@@ -11,7 +11,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 import me.najclark.gll.ga.NNGA;
-import me.najclark.gll.ga.Individual;
+import me.najclark.gll.ga.Phenotype;
 import me.najclark.gll.nn.ActivationFunction;
 import me.najclark.gll.nn.Layer;
 import me.najclark.gll.nn.NetworkPicture;
@@ -38,7 +38,7 @@ public class Trainer extends NNGA {
 			NeuralNetwork nn = new NeuralNetwork(base);
 			nn.makeWeightGroups();
 
-			Individual ind = new Individual(0.0, nn, Individual.generateName());
+			Phenotype ind = new Phenotype(0.0, nn, Phenotype.generateName());
 			pool.add(ind);
 		}
 
@@ -59,8 +59,8 @@ public class Trainer extends NNGA {
 		while (avgFitness < 95 && generation < 1000) {
 			selection();
 
-			Individual ind = getBestIndividual();
-			np.update((NeuralNetwork)ind.pt);
+			Phenotype ind = getBestIndividual();
+			np.update((NeuralNetwork)ind.gt);
 			BufferedImage img = np.getNetworkImage(frame.getWidth(), frame.getHeight(), 60);
 			Graphics g = img.getGraphics();
 			g.setColor(Color.black);
@@ -72,7 +72,7 @@ public class Trainer extends NNGA {
 			// System.out.println(this.avgFitness);
 
 			ArrayList<String> startingLetters = new ArrayList<String>();
-			for (Individual i : getPopulation()) {
+			for (Phenotype i : getPopulation()) {
 				startingLetters.add(i.name.substring(0, 1));
 			}
 			g.drawString("Highest Starting Letter: " + calculateElectionWinner(startingLetters), 50, 75);
@@ -88,14 +88,14 @@ public class Trainer extends NNGA {
 
 	@Override
 	public void makeNewGeneration() {
-		ArrayList<Individual> newPool = new ArrayList<Individual>();
+		ArrayList<Phenotype> newPool = new ArrayList<Phenotype>();
 
 		populateMatingPool(pool);
 		for (int i = 0; i < pool.size() * 0.5; i++) {
-			Individual p1 = pickParent(null, 0);
-			Individual p2 = pickParent(p1, 0);
-			Individual crossed = crossover(p1, p2);
-			Individual mutated = mutate(crossed, mutateRate);
+			Phenotype p1 = pickParent(null, 0);
+			Phenotype p2 = pickParent(p1, 0);
+			Phenotype crossed = crossover(p1, p2);
+			Phenotype mutated = mutate(crossed, mutateRate);
 			newPool.add(mutated);
 		}
 		newPool.addAll(getHighestHalf(pool));
@@ -103,7 +103,7 @@ public class Trainer extends NNGA {
 		avgNeurons = 0;
 		for (int i = 0; i < pool.size(); i++) {
 			avgFitness += pool.get(i).fitness;
-			avgNeurons += ((NeuralNetwork)pool.get(i).pt).getTotalNeurons();
+			avgNeurons += ((NeuralNetwork)pool.get(i).gt).getTotalNeurons();
 		}
 
 		avgFitness /= pool.size();
