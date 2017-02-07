@@ -4,17 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
-import me.najclark.gll.nn.ActivationFunction;
-import me.najclark.gll.nn.Layer;
-import me.najclark.gll.nn.NeuralNetwork;
-import me.najclark.gll.nn.Neuron;
-import me.najclark.gll.nn.WeightGroup;
-
 public abstract class GeneticAlgorithm {
 
 	private ArrayList<Phenotype> matingPool = new ArrayList<Phenotype>();
-	protected ArrayList<Phenotype> pool;
-	protected Random random = new Random();
+	public ArrayList<Phenotype> pool;
+	public Random random = new Random();
 	protected int maxFitness = 0;
 	protected double mutateRate = 0.01;
 	protected int generation = 0;
@@ -31,138 +25,38 @@ public abstract class GeneticAlgorithm {
 		this(0);
 	}
 	
-	public Phenotype mutate(Phenotype ind, double mutateRate) {
-		NeuralNetwork nn = (NeuralNetwork) ind.gt;
-		NeuralNetwork mutated = new NeuralNetwork(nn);
-		mutated.makeWeightGroups();
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Phenotype mutate(Phenotype ind) {
+		GeneList gl = (GeneList) ind.gt;
 		boolean changed = false;
 
-		for (int i = 0; i < nn.getWeightGroups().size(); i++) {
-			WeightGroup wg = mutated.getWeightGroups().get(i);
-			for (int d = 0; d < wg.getWeights().length; d++) {
-				if (random.nextDouble() < mutateRate / nn.getTotalNeurons()) {
-					changed = true;
-					wg.setWeight(d, (random.nextDouble() - 0.5));
-				} else {
-					wg.setWeight(d, nn.getWeightGroups().get(i).getWeights()[d]);
-				}
-			}
-			mutated.setWeightGroup(i, wg);
-		}
-		if (random.nextDouble() < mutateRate) { // special
-																	// mutation
+		if(random.nextDouble() < mutateRate){
 			changed = true;
-			if (random.nextDouble() < mutateRate / 10) { // Add or remove Layer
-															// to
-				// NeuralNetwork
-				NeuralNetwork changedDesign = new NeuralNetwork(nn);
-				int index;
-				if (nn.getLayers().size() <= 2) {
-					index = 1;
-				} else {
-					index = random.nextInt(nn.getLayers().size() - 2) + 1;
-				}
-				if (random.nextBoolean() || nn.getLayers().size() == 2) { // Add
-																			// a
-																			// layer
-					int neurons = nn.getTotalNeurons() / nn.getLayers().size();
-					changedDesign.addLayerAt(index, new Layer(neurons));
-				} else { // Remove a layer
-					changedDesign.removeLayer(index);
-				}
-				changedDesign.makeWeightGroups();
-				return new Phenotype(0, changedDesign, ind.name);
-			} else { // Add or remove a neuron from a layer
-				NeuralNetwork changedDesign = new NeuralNetwork(nn);
-				if (nn.getLayers().size() > 2) {
-
-					int changeLayer = random.nextInt(nn.getLayers().size() - 2) + 1;
-
-					Layer l = nn.getLayers().get(changeLayer);
-					int deltaNeurons = pickMutationLevel();
-					if (random.nextBoolean()) {
-						for (int i = 0; i < deltaNeurons; i++) {
-							l.addNeuron(new Neuron(ActivationFunction.sigmoid));
-						}
-					} else {
-						l = new Layer();
-						for (int i = 0; i < Math.max(1,
-								nn.getLayers().get(changeLayer).getNeurons().length - deltaNeurons); i++) {
-							l.addNeuron(nn.getLayers().get(changeLayer).getNeuron(i));
-						}
-					}
-
-					changedDesign.setLayer(changeLayer, l);
-					changedDesign.makeWeightGroups();
-
-					for (int w = 0; w < nn.getWeightGroups().size(); w++) {
-						WeightGroup wg = nn.getWeightGroups().get(w);
-						WeightGroup newWg = changedDesign.getWeightGroups().get(w);
-						int index = 0;
-						while (index < wg.getWeights().length && index < newWg.getWeights().length) {
-							newWg.setWeight(index, wg.getWeight(index));
-							index++;
-						}
-						changedDesign.setWeightGroup(w, newWg);
-					}
-					return new Phenotype(0, changedDesign, ind.name);
-				}
-			}
+			Object a = gl.get(random.nextInt(gl.size()));
+			Object b = gl.get(random.nextInt(gl.size()));
+			gl.set(gl.indexOf(b), a);
+			gl.set(gl.indexOf(a), b);
 		}
 
 		String mutatedName = ind.name;
 		if (changed) {
 			mutatedName = Phenotype.mutateName(ind.name, 1, Phenotype.SKIP_FIRST);
 		}
-		return new Phenotype(0, mutated, mutatedName);
+		return new Phenotype(0, gl, mutatedName);
 	}
 
-	private int pickMutationLevel() {
-		int[] bin = { 1, 1, 1, 1, 1, 1, 2, 2, 2, 3 }; // 1 60%, 2 30%, 3 10%
-		return bin[random.nextInt(bin.length)];
-	}
-
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Phenotype crossover(Phenotype ind, Phenotype ind2) {
-		NeuralNetwork nn = (NeuralNetwork) ind.gt;
-		NeuralNetwork nn2 = (NeuralNetwork) ind2.gt;
-		NeuralNetwork crossed;
-		NeuralNetwork copied;
-		if (random.nextBoolean()) {
-			crossed = new NeuralNetwork(nn);
-			copied = nn;
-		} else {
-			crossed = new NeuralNetwork(nn2);
-			copied = nn2;
-		}
-
-		crossed.makeWeightGroups();
-		crossed.setWeightGroups(copied.getWeightGroups());
-
-		int i = 0;
-		while (i < nn.getWeightGroups().size() && i < nn2.getWeightGroups().size()) {
-			WeightGroup wg = nn.getWeightGroups().get(i);
-			WeightGroup wg2 = nn2.getWeightGroups().get(i);
-			WeightGroup newWg = crossed.getWeightGroups().get(i);
-
-			if (wg.getWeights().length == newWg.getWeights().length) {
-				newWg.setWeights(wg.getWeights());
-			} else {
-				newWg.setWeights(wg2.getWeights());
+		GeneList p1 = (GeneList) ind.gt;
+		GeneList p2 = (GeneList) ind2.gt;
+		
+		if(p1.size() == p2.size()){
+			int crossPoint = random.nextInt(p1.size());
+			for(int i = crossPoint; i < p2.size(); i++){
+				p1.set(i, p2.get(i));
 			}
-
-			int index = 0;
-			while (index < wg.getWeights().length && index < wg2.getWeights().length) {
-				if (random.nextBoolean()) {
-					newWg.setWeight(index, wg.getWeight(index));
-				} else {
-					newWg.setWeight(index, wg2.getWeight(index));
-				}
-				index++;
-			}
-			crossed.setWeightGroup(i, newWg);
-			i++;
 		}
-		return new Phenotype(0, crossed, Phenotype.mixNames(ind.name, ind2.name));
+		return new Phenotype(0, p1, Phenotype.mixNames(ind.name, ind2.name));
 	}
 
 	public Genotype acceptReject(ArrayList<Phenotype> pool, int maxFitness) {
@@ -184,7 +78,6 @@ public abstract class GeneticAlgorithm {
 	}
 
 	public Phenotype pickParent(Phenotype not, int iteration) {
-		// System.out.println(matingPool.size());
 		Phenotype parent = matingPool.get(random.nextInt(matingPool.size()));
 		if (iteration > 100) {
 			return parent;
@@ -259,21 +152,6 @@ public abstract class GeneticAlgorithm {
 		return output;
 	}
 
-	public String progressBar(int progress) {
-		String percent = "|";
-		for (int i = 0; i < 10; i++) {
-			if (progress >= 10) {
-				percent += "=";
-			} else {
-				percent += "-";
-			}
-
-			progress -= 10;
-		}
-		percent += "|\r";
-		return percent;
-	}
-
 	public void runGeneration() {
 		selection();
 
@@ -295,7 +173,7 @@ public abstract class GeneticAlgorithm {
 				public void run() {
 					Phenotype ind = pool.get(this.poolId);
 					pool.set(this.poolId,
-							new Phenotype(simulate((NeuralNetwork) ind.gt), (NeuralNetwork) ind.gt, ind.name));
+							new Phenotype(simulate(ind.gt), ind.gt, ind.name));
 				}
 			}
 
@@ -318,13 +196,13 @@ public abstract class GeneticAlgorithm {
 		} else {
 			for (int i = 0; i < pool.size(); i++) {
 				Phenotype ind = pool.get(i);
-				pool.set(i, new Phenotype(simulate((NeuralNetwork)ind.gt), (NeuralNetwork)ind.gt, ind.name));
+				pool.set(i, new Phenotype(simulate(ind.gt), ind.gt, ind.name));
 			}
 		}
 
 	}
 
-	public abstract double simulate(NeuralNetwork nn);
+	public abstract double simulate(Genotype pt);
 
 	public abstract void makeNewGeneration();
 

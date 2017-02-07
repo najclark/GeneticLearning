@@ -18,10 +18,10 @@ import me.najclark.gll.nn.NetworkPicture;
 import me.najclark.gll.nn.NeuralNetwork;
 import me.najclark.gll.nn.Neuron;
 
-public class Trainer extends NNGA {
+public class ExampleOne extends NNGA {
 
 	public static void main(String[] args) {
-		new Trainer().run();
+		new ExampleOne().run();
 	}
 
 	public void run() {
@@ -116,29 +116,6 @@ public class Trainer extends NNGA {
 		generation++;
 	}
 
-	@Override
-	public double simulate(NeuralNetwork nn) {
-		double avgDist = 0;
-		for (int a = 0; a < 3; a++) {
-			nn.clear();
-
-			Layer input = new Layer(nn.getLayer(0).size());
-			input.setNeuron(0, new Neuron(1));
-			for (int i = 1; i < input.size(); i++) {
-				 input.setNeuron(i, new Neuron(random.nextInt(10) - 5));
-				//input.setNeuron(i, new Neuron(i + 1));
-			}
-
-			nn.setInputs(input);
-
-			nn.flush();
-
-			avgDist += Math.abs(1 - nn.getOutputs().getNeuron(0).getValue());
-		}
-		avgDist /= 3;
-		return (1 / (Math.pow(10, avgDist))) * 100;
-	}
-
 	public String calculateElectionWinner(ArrayList<String> votes) {
 		HashMap<String, Integer> people = new HashMap<String, Integer>();
 
@@ -162,6 +139,29 @@ public class Trainer extends NNGA {
 		}
 
 		return key;
+	}
+
+	@Override
+	public double simulate(NeuralNetwork nn) {
+		double avgDist = 0;
+		for (int a = 0; a < 3; a++) {
+			nn.clear();
+
+			Layer input = new Layer(nn.getLayer(0).size());
+			input.setNeuron(0, new Neuron(1));
+			for (int i = 1; i < input.size(); i++) {
+				 input.setNeuron(i, new Neuron(random.nextInt(10) - 5));
+				//input.setNeuron(i, new Neuron(i + 1));
+			}
+
+			nn.setInputs(input);
+
+			nn.flush();
+
+			avgDist += Math.abs(1 - nn.getOutputs().getNeuron(0).getValue());
+		}
+		avgDist /= 3;
+		return (1 / (Math.pow(10, avgDist))) * 100;
 	}
 
 }

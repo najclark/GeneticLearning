@@ -10,7 +10,7 @@ import me.najclark.gll.nn.NeuralNetwork;
 import me.najclark.gll.nn.Neuron;
 import me.najclark.gll.nn.WeightGroup;
 
-public abstract class NNGA extends GeneticAlgorithm{
+public abstract class NNGA{
 
 	private ArrayList<Phenotype> matingPool = new ArrayList<Phenotype>();
 	protected ArrayList<Phenotype> pool;
