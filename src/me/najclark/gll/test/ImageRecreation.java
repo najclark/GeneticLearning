@@ -1,15 +1,15 @@
 package me.najclark.gll.test;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
@@ -18,7 +18,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import me.najclark.gll.ga.GeneList;
 import me.najclark.gll.ga.GeneticAlgorithm;
 import me.najclark.gll.ga.Genotype;
 import me.najclark.gll.ga.Phenotype;
@@ -26,10 +25,10 @@ import me.najclark.gll.ga.Phenotype;
 public class ImageRecreation {
 
 	BufferedImage base;
+	static int rDividen = 1;
 
 	public static void main(String[] args) {
-		new ImageRecreation().run(100, 0.05, 50, 4,
-				"/home/nicholas/git/GeneticLearning/src/me/najclark/gll/res/penguins.jpg");
+		new ImageRecreation().run(100, 1, 50, 4, "/home/nicholas/git/GeneticLearning/src/me/najclark/gll/res/bear.jpg");
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -37,6 +36,12 @@ public class ImageRecreation {
 
 		try {
 			base = ImageIO.read(new File(imgPath));
+
+			BufferedImage image = new BufferedImage(base.getWidth(), base.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+			Graphics g = image.getGraphics();
+			g.drawImage(base, 0, 0, null);
+			g.dispose();
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -45,7 +50,8 @@ public class ImageRecreation {
 
 			@Override
 			public Phenotype mutate(Phenotype ind) {
-				Splotch gl = (Splotch) ind.gt;
+				Splotch past = (Splotch) ind.gt;
+				Splotch gl = new Splotch(past.poly, past.c);
 				boolean changed = false;
 
 				if (random.nextDouble() < mutateRate) {
@@ -54,25 +60,19 @@ public class ImageRecreation {
 
 					int x = old.getBounds().x;
 					int y = old.getBounds().y;
-					int w = old.getBounds().width;
-					int h = old.getBounds().height;
-					Color c = gl.c;
+					int r = old.getBounds().width;
 
 					double choice = random.nextDouble();
-					if (choice < 0.2) {
-						x = random.nextInt(base.getWidth());
-						w = random.nextInt(base.getWidth() - x);
-					} else if (choice < 0.4 && 0.2 <= choice) {
-						y = random.nextInt(base.getHeight());
-						h = random.nextInt(base.getHeight() - y);
-					} else if (choice < 0.6 && 0.4 <= choice) {
-						w = random.nextInt(base.getWidth() - x);
-					} else if (choice < 0.8 && 0.6 <= choice) {
-						h = random.nextInt(base.getHeight() - y);
+					if (choice < 0.25) {
+						x = random.nextInt(base.getWidth() - 100);
+					} else if (choice < 0.5 && 0.25 <= choice) {
+						y = random.nextInt(base.getHeight() - 100);
+					} else if (choice < 0.75 && 0.5 <= choice) {
+						r = Math.max(30, random.nextInt(base.getHeight() / rDividen));
 					} else {
 						gl = new Splotch(old);
 					}
-					gl.poly = new Rectangle(x, y, w, h);
+					gl.poly = new Ellipse2D.Double(x, y, r, r);
 				}
 
 				String mutatedName = ind.name;
@@ -86,27 +86,7 @@ public class ImageRecreation {
 			@Override
 			public double simulate(Genotype gt) {
 
-				BufferedImage generated = new BufferedImage(base.getWidth(), base.getHeight(),
-						BufferedImage.TYPE_INT_ARGB);
-				Graphics2D g2d = (Graphics2D) generated.getGraphics();
-
-				Splotch spot = (Splotch) gt;
-				g2d.setColor(spot.c);
-				g2d.fill(spot.poly);
-
-				double fitness = 0;
-				for (int x = 0; x < generated.getWidth(); x++) {
-					for (int y = 0; y < generated.getHeight(); y++) {
-						if (spot.poly.getBounds().contains(new Point(x, y))) {
-							Color a = new Color(generated.getRGB(x, y));
-							Color b = new Color(base.getRGB(x, y));
-
-							fitness += distance(a, b);
-						}
-					}
-				}
-
-				return fitness / 1000;
+				return evaluate((Splotch) gt);
 			}
 
 			public double distance(Color a, Color b) {
@@ -114,63 +94,73 @@ public class ImageRecreation {
 						+ Math.pow(a.getBlue() + b.getBlue(), 2));
 			}
 
+			public double evaluate(Splotch spot) {
+
+				BufferedImage generated = new BufferedImage(base.getWidth(), base.getHeight(),
+						BufferedImage.TYPE_INT_ARGB);
+				Graphics2D g2d = (Graphics2D) generated.getGraphics();
+
+				// g2d.setColor(intToColor(spot.grayScale));
+				g2d.setColor(Color.BLACK);
+				g2d.fillRect(0, 0, base.getWidth(), base.getHeight());
+				g2d.setColor(spot.c);
+				g2d.fill(spot.poly);
+
+				double fitness = 0;
+				for (int x = 0; x < generated.getWidth(); x++) {
+					for (int y = 0; y < generated.getHeight(); y++) {
+						if (spot.poly.getBounds().contains(new Point(x, y))) {
+							if (x < base.getWidth() && y < base.getHeight()) {
+								Color a = new Color(generated.getRGB(x, y));
+								Color b = new Color(base.getRGB(x, y));
+
+								fitness += distance(a, b);
+							}
+						}
+					}
+				}
+				return fitness / 1000;
+			}
+
 			@Override
 			public void makeNewGeneration() {
 
-				// Shuffle lowest to highest
-				// double lowest = Integer.MAX_VALUE;
-				// for (int i = 0; i < pool.size(); i++) {
-				// if (pool.get(i).fitness < lowest) {
-				// lowest = pool.get(i).fitness;
-				// }
-				// }
-				//
-				// for (int i = 0; i < pool.size(); i++) {
-				// Phenotype pt = pool.get(i);
-				// pt.fitness = Math.abs(pt.fitness + lowest);
-				// pool.set(i, pt);
-				// }
-
 				// Make new generation
 				ArrayList<Phenotype> newPool = new ArrayList<Phenotype>();
-				pool = getSorted(pool);
-				//newPool.addAll(getHighestHalf(pool));
-				for(int i = pool.size() - 1; i >= pool.size()*0.1; i--){
-					newPool.add(pool.get(i));
-				}
 
-				// Phenotype worst = null;
-				// double highest = Double.MIN_NORMAL;
-				// for(int i = 0; i < pool.size(); i++){
-				// if(pool.get(i).fitness > highest){
-				// worst = pool.get(i);
-				// highest = pool.get(i).fitness;
-				// }
-				// }
-				//
-				// for(int i = 0; i < pool.size(); i++){
-				// if(pool.get(i) != worst){
-				// newPool.add(pool.get(i));
-				// }
-				// }
-
-				// System.out.println(Arrays.asList(pool));
-				//System.out.println(((Splotch) getSorted(pool).get(0).gt).c);
-
-				for (int i = 0; i < pool.size()*0.9; i++) {
-					newPool.add(new Phenotype(0, new Splotch(base.getWidth(), base.getHeight(), sides),
-							Phenotype.generateName()));
-				}System.out.println(pool.size());
-
-				double fitness = 0;
 				for (Phenotype pt : pool) {
-					fitness += pt.fitness;
+					Phenotype daughter = mutate(pt);
+					double fitness = evaluate((Splotch) daughter.gt);
+					daughter.fitness = fitness;
+					int attempts = 0;
+
+					while (fitness < pt.fitness && attempts < 10) {
+						daughter = mutate(pt);
+						fitness = evaluate((Splotch) daughter.gt);
+						daughter.fitness = fitness;
+						attempts++;
+					}
+					if (fitness < pt.fitness) {
+						newPool.add(daughter);
+					} else {
+						newPool.add(pt);
+					}
+					// newPool.add(daughter);
+					// newPool.add(pt);
 				}
-				avgFitness = fitness / pool.size();
+
+				double oldFitness = 0;
+				double newFitness = 0;
+				for (int i = 0; i < pool.size(); i++) {
+					oldFitness += pool.get(i).fitness;
+					newFitness += newPool.get(i).fitness;
+				}
+				double avgOldFitness = oldFitness / pool.size();
+				double avgNewFitness = newFitness / pool.size();
 
 				pool.clear();
 				pool.addAll(newPool);
-				output = "Generation: " + generation + ". Best Fitness: " + getBestIndividual().fitness;
+				output = "Generation: " + generation + ". Avg Old Fitness: " + avgOldFitness + " vs " + avgNewFitness;
 			}
 
 			@Override
@@ -193,28 +183,43 @@ public class ImageRecreation {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		JPanel panel = new JPanel();
 		JLabel lbl = new JLabel();
+		JLabel lblOut = new JLabel();
 
 		panel.add(lbl);
+		panel.add(lblOut);
 		frame.add(panel);
-		frame.setSize(base.getWidth(), base.getHeight());
+		frame.setSize(base.getWidth() * 2, base.getHeight() + 70);
 		frame.setVisible(true);
 
 		while (ga.getAvgFitness() < 100) {
 			ga.runGeneration();
 
-			BufferedImage generated = new BufferedImage(base.getWidth(), base.getHeight(), BufferedImage.TYPE_INT_ARGB);
+			BufferedImage generated = new BufferedImage(base.getWidth() * 2, base.getHeight(),
+					BufferedImage.TYPE_INT_ARGB);
 			Graphics2D g2d = (Graphics2D) generated.getGraphics();
 
 			// ArrayList<Phenotype> list = ga.getHighestHalf(ga.pool);
 			ArrayList<Phenotype> list = ga.pool;
+			g2d.setColor(Color.BLACK);
+			g2d.fillRect(0, 0, base.getWidth(), base.getHeight());
 			for (int i = 0; i < list.size(); i++) {
+				// g2d.setColor(intToColor(((Splotch)
+				// list.get(i).gt).grayScale));
 				g2d.setColor(((Splotch) list.get(i).gt).c);
 				g2d.fill(((Splotch) list.get(i).gt).poly);
 			}
 
+			g2d.drawImage(base, base.getWidth(), 0, null);
+			lblOut.setText(ga.getOutput());
+
 			lbl.setIcon(new ImageIcon(generated));
 			// System.out.println(ga.getOutput());
 		}
+	}
+
+	private Color intToColor(int colNum) {
+		int rgbNum = 255 - (int) ((colNum / 50.0) * 255.0);
+		return new Color(rgbNum, rgbNum, rgbNum);
 	}
 
 }
@@ -222,6 +227,7 @@ public class ImageRecreation {
 class Splotch implements Genotype {
 	private static Random random = new Random();
 	Shape poly;
+	// int grayScale;
 	Color c;
 
 	public Splotch(Shape poly, Color c) {
@@ -230,11 +236,11 @@ class Splotch implements Genotype {
 	}
 
 	public Splotch(Shape poly) {
-
+		this(poly, randomColor());
 	}
 
-	public Splotch(Color c) {
-
+	public Splotch(int width, int height, int sides, Color c) {
+		this(randomPoly(width, height, sides), c);
 	}
 
 	public Splotch(int width, int height, int sides) {
@@ -249,12 +255,14 @@ class Splotch implements Genotype {
 		// xpoints[j] = random.nextInt(width);
 		// ypoints[j] = random.nextInt(height);
 		// }
-		int x = random.nextInt(width);
-		int y = random.nextInt(height);
-		return new Rectangle(x, y, random.nextInt(width - x), random.nextInt(height - y));
+		int x = random.nextInt(width - 100);
+		int y = random.nextInt(height - 100);
+		int r = Math.max(30, random.nextInt(height / ImageRecreation.rDividen));
+		return new Ellipse2D.Double(x, y, r, r);
 	}
 
 	private static Color randomColor() {
 		return new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255), random.nextInt(255));
+		// return random.nextInt(50) + 1;
 	}
 }
